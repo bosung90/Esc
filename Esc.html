@@ -1,18 +1,29 @@
 <head>
 	<title>Esc</title>
+	<link href="node_modules/materialize-css/bin/materialize.css" rel="stylesheet" />
+	<script src="node_modules/materialize-css/bin/materialize.js"></script>
 </head>
 
 <body>
 	<h1>Please follow server's instructions!</h1>
-	{{#each chats}}
-		{{> chat}}
-	{{/each}}
+	<ul>
+		<!--{{#each chats}}
+			{{> chat}}
+		{{/each}}-->
+
+		{{> number_range}}
+	</ul>
 	<form class="new-chat">
-		<input type="number" required name="text" autofocus="autofocus" min="1" max="100" placeholder="Type to add new chats" />
+		<input type="number" required name="text" autofocus="autofocus" min="1" max="100" placeholder="Guess a number" />
 		<input type="text" required name="username" placeholder="Enter your name" />
 		<input type="submit" style="visibility: hidden;" />
 	</form>
 </body>
+
+<template name="number_range">
+	{{high_num}}<br />
+	{{lower_num}}
+</template>
 
 <template name="chat">
 	<li>{{guessed_number}}</li>
