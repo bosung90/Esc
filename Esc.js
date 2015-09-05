@@ -2,18 +2,6 @@ Chats = new Mongo.Collection("chats");
 
 if (Meteor.isClient)
 {
-	Template.number_range.helpers({
-		high_num: function()
-		{
-			return 100;
-		},
-		lower_num: function()
-		{
-			return 1;
-		}
-	})
-
-
 	var previous;
 	Template.body.helpers({
 		chats: function ()
@@ -38,8 +26,7 @@ if (Meteor.isClient)
 			if (previous == null || (createdAt - previous >= 3000))
 			{
 				//console.log(username);
-				var newChatId = Meteor.call('addChat', text, username);
-				console.log('newChatId: ' + newChatId);
+				Meteor.call('addChat', text, username);
 				//Meteor.call('addChat', text);
 
 				previous = createdAt;
@@ -53,7 +40,6 @@ if (Meteor.isClient)
 if (Meteor.isServer)
 {
 	var answer = Math.floor((Math.random() * 100) + 1);
-	var isGameOver = false;
 	// Keep track of number of players who got the right answer
 	var finishedUserNum = 0;
 	var users = {};
@@ -92,11 +78,6 @@ if (Meteor.isServer)
 	Meteor.methods({
 		addChat: function (chat, username)
 		{
-			if (isGameOver)
-			{
-				Chats.insert({ guessed_number: 'Game is over. It will start again soon.' });
-				return -1;
-			}
 			console.log(answer);
 			// Check if users has username
 			if (users[username] == null)
@@ -104,6 +85,7 @@ if (Meteor.isServer)
 				// username is not in users
 				users[username] = 0;
 			}
+
 
 			// Check if chat is a number
 			if (isNaN(chat))
@@ -125,16 +107,13 @@ if (Meteor.isServer)
 					users[username] = finishedUserNum;
 					if (isEveryoneFinished())
 					{
-						isGameOver = true;
-						printScoreboard(function (response)
+						var sortedUser = sortUserByRank(users);
+						for (i = 0; i < sortedUser.length; i++)
 						{
-							Chats.remove({});
-							console.log("resetting users");
-							users = {};
-							console.log('users size: ' + Object.keys(users).length);
-							finishedUserNum = 0;
-							isGameOver = false;
-						})
+							Chats.insert({ guessed_number: sortedUser[i][1] + ". " + sortedUser[i][0] });
+						}
+						users = {};
+						finishedUserNum = 0;
 					}
 					return feedback;
 				}
@@ -153,14 +132,4 @@ if (Meteor.isServer)
 			}
 		}
 	});
-
-	var printScoreboard = function (callback)
-	{
-		var sortedUser = sortUserByRank(users);
-		for (i = 0; i < sortedUser.length; i++)
-		{
-			Chats.insert({ guessed_number: sortedUser[i][1] + ". " + sortedUser[i][0] });
-		}
-		setTimeout(callback, 10000);
-	}
 }
