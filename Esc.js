@@ -1,19 +1,28 @@
-if (Meteor.isClient) {
-  // counter starts at 0
-  Session.setDefault('counter', 0);
+Chats = new Mongo.Collection("chats");
 
-  Template.hello.helpers({
-    counter: function () {
-      return Session.get('counter');
-    }
-  });
+if (Meteor.isClient)
+{
+	Template.body.helpers({
+		chats: function () {
+			return Chats.find({});
+		}
+	});
 
-  Template.hello.events({
-    'click button': function () {
-      // increment the counter when button is clicked
-      Session.set('counter', Session.get('counter') + 1);
-    }
-  });
+	Template.body.events({
+		"submit .new-chat": function (event) {
+			// Prevent default browser form submit
+			event.preventDefault();
+			// Get value from form element
+			var text = event.target.text.value;
+			// Insert a task into the collection
+			Chats.insert({
+				guessed_number: text,
+				createdAt: new Date() // current time
+			});
+			// Clear form
+			event.target.text.value = "";
+		}
+	});
 }
 
 if (Meteor.isServer) {

@@ -3,12 +3,15 @@
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
-
-  {{> hello}}
+	<h1>Please follow server's instructions!</h1>
+	{{#each chats}}
+		{{> chat}}
+	{{/each}}
+	<form class="new-chat">
+		<input type="text" name="text" placeholder="Type to add new chats" />
+	</form>
 </body>
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+<template name="chat">
+	<li>{{guessed_number}}</li>
 </template>
