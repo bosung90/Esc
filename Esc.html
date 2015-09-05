@@ -1,5 +1,5 @@
 <head>
-  <title>Esc</title>
+	<title>Esc</title>
 </head>
 
 <body>
@@ -8,7 +8,9 @@
 		{{> chat}}
 	{{/each}}
 	<form class="new-chat">
-		<input type="text" name="text" placeholder="Type to add new chats" />
+		<input type="number" required name="text" autofocus="autofocus" min="1" max="100" placeholder="Type to add new chats" />
+		<input type="text" required name="username" placeholder="Enter your name" />
+		<input type="submit" style="visibility: hidden;" />
 	</form>
 </body>
 
