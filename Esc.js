@@ -1,25 +1,37 @@
 Chats = new Mongo.Collection("chats");
+Max = new Mongo.Collection('max');
+Min = new Mongo.Collection('min');
 
 if (Meteor.isClient)
 {
 	Template.number_range.helpers({
 		high_num: function ()
 		{
-			return 100;
+			var firstMax = Max.findOne();
+			if (firstMax == null)
+			{
+				return 100;
+			}
+			else
+			{
+				return Max.findOne().max;
+			}
 		},
 		lower_num: function ()
 		{
-			return 1;
+			var firstMin = Min.findOne();
+			if (firstMin == null)
+			{
+				return 1;
+			}
+			else
+			{
+				return Min.findOne().min;
+			}
 		}
 	});
 
 	var previous;
-	Template.body.helpers({
-		chats: function ()
-		{
-			return Chats.find({});
-		}
-	});
 
 	Template.body.events({
 		"submit .new-chat": function (event)
@@ -79,6 +91,8 @@ if (Meteor.isServer)
 	{
 		finishedUserNum = 0;
 		users = {};
+		Max.remove({});
+		Min.remove({});
 		// code to run on server at startup
 		Chats.remove({});
 		Chats.insert({
@@ -89,14 +103,12 @@ if (Meteor.isServer)
 	Meteor.methods({
 		addChat: function (chat, username)
 		{
-			console.log(answer);
 			// Check if users has username
 			if (users[username] == null)
 			{
 				// username is not in users
 				users[username] = 0;
 			}
-
 
 			// Check if chat is a number
 			if (isNaN(chat))
@@ -125,19 +137,23 @@ if (Meteor.isServer)
 						}
 						users = {};
 						finishedUserNum = 0;
+						Max.remove({});
+						Min.remove({});
 					}
 					return feedback;
 				}
 				else if (chatInt > answer)
 				{
 					// guess was too high
-					feedback = Chats.insert({ guessed_number: chat + ' is too high!' });
+					Max.remove({});
+					Max.insert({ max: chatInt });
 					return feedback;
 				}
 				else
 				{
 					// guess was too low
-					feedback = Chats.insert({ guessed_number: chat + ' is too low!' });
+					Min.remove({});
+					Min.insert({ min: chatInt });
 					return feedback;
 				}
 			}

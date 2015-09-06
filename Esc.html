@@ -4,8 +4,8 @@
 
 <body>
 	<h2>NumberEsc</h2>
-	
-	{{> number_range}}
+
+	{{> numberRange}}
 
 	<form class="new-chat">
 		<input type="number" required name="text" autofocus="autofocus" min="1" max="100" placeholder="Type to add new chats" />
@@ -14,12 +14,8 @@
 	</form>
 </body>
 
-<template name="number_range">
+<template name="numberRange">
 	{{high_num}}
 	<br />
 	{{lower_num}}
-</template>
-
-<template name="chat">
-	<li>{{guessed_number}}</li>
 </template>
