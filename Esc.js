@@ -46,7 +46,7 @@ if (Meteor.isClient) {
             // Get value from form element
             var text = event.target.text.value;
             var username = event.target.username.value;
-            //document.getElementById('nameID').readOnly = true;
+            document.getElementById('nameID').disabled = true;
             // Insert a task into the collection
             //Chats.insert({
             //	guessed_number: text
