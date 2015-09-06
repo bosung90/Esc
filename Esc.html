@@ -21,10 +21,13 @@
 			<thead>
 				<tr>
 					<th data-field="id">Rank</th>
-					<th data-field="name">Username</th>
+					<th data-field="name">Players</th>
 				</tr>
 			</thead>
 			<tbody>
+                {{#each userlist}}
+                {{> users}}
+                {{/each}}
 				{{#each ranks}}
 				{{> rank}}
 				{{/each}}
@@ -37,6 +40,13 @@
     <tr>
         <td>{{score}}</td>
         <td>{{name}}</td>
+    </tr>
+</template>
+
+<template name ="users">
+    <tr>
+        <td></td>
+        <td>{{userID}}</td>
     </tr>
 </template>
 

@@ -1,13 +1,19 @@
 ScoreBoard = new Mongo.Collection("scores");
 Max = new Mongo.Collection('max');
 Min = new Mongo.Collection('min');
+Users = new Mongo.Collection("userlist");
 
 if (Meteor.isClient) {
     Template.body.helpers({
         ranks: function () {
             return ScoreBoard.find({});
+        },
+
+        userlist: function () {
+            return Users.find({});
         }
     });
+
 
     Template.number_range.helpers({
         high_num: function () {
@@ -94,10 +100,11 @@ if (Meteor.isServer) {
     var resetGame = function ()
     {
     	finishedUserNum = 0;
-    	users = {};
+    	users = {};    	
     	Max.remove({});
     	Min.remove({});
     	ScoreBoard.remove({});
+    	Users.remove({});
     }
 
     Meteor.methods({
@@ -105,6 +112,7 @@ if (Meteor.isServer) {
             // Check if users has username
             if (users[username] == null) {
                 // username is not in users
+                Users.insert({ userID: username });
                 users[username] = 0;
             }
 
@@ -122,6 +130,7 @@ if (Meteor.isServer) {
                     users[username] = finishedUserNum;
                     if (isEveryoneFinished()) {
                         var sortedUser = sortUserByRank(users);
+                        Users.remove({});
                         for (i = 0; i < sortedUser.length; i++) {
                             ScoreBoard.insert({ score: sortedUser[i][1], name: sortedUser[i][0] });
                         }
