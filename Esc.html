@@ -3,6 +3,7 @@
 </head>
 
 <body>
+    <div class="guess_number_wrapper">
 	<h2>NumberEsc</h2>
 
 	{{> number_range}}
@@ -12,14 +13,16 @@
 		<input type="text" required name="username" placeholder="Enter your name" />
 		<input type="submit" style="visibility: hidden;" />
 	</form>
+    </div>
 </body>
 
 <template name="number_range">
     <div class="row">
         <div class="col s12 m5">
-            <div class="card-panel teal">
+            <div class="card-panel pink">
                 <span class="white-text">
                     {{high_num}}
+                    &darr;
                 </span>
             </div>
         </div>
@@ -27,9 +30,10 @@
 	<br />
     <div class="row">
         <div class="col s12 m5">
-            <div class="card-panel teal">
+            <div class="card-panel pink">
                 <span class="white-text">
                     {{lower_num}}
+                    &uarr; 
                 </span>
             </div>
         </div>
