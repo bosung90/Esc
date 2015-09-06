@@ -5,6 +5,8 @@ GameStatus = new Mongo.Collection('gameStatus');
 
 if (Meteor.isClient)
 {
+	var previous;
+
 	Template.body.helpers({
 		ranks: function ()
 		{
@@ -56,7 +58,7 @@ if (Meteor.isClient)
 			var firstMax = Max.findOne();
 			if (firstMax == null)
 			{
-				return 'hidden';
+				return 'normal';
 			}
 			return Max.findOne().high_num_bullet_visibility;
 		},
@@ -65,13 +67,11 @@ if (Meteor.isClient)
 			var firstMin = Min.findOne();
 			if (firstMin == null)
 			{
-				return 'hidden';
+				return 'normal';
 			}
 			return Min.findOne().low_num_bullet_visibility;
 		}
 	});
-
-	var previous;
 
 	Template.body.events({
 		"submit .new-chat": function (event)
@@ -110,13 +110,28 @@ if (Meteor.isClient)
 
 if (Meteor.isServer)
 {
-	var answer = Math.floor((Math.random() * 9999) + 1);
+	var answer;
 	// Keep track of number of players who got the right answer
-	var finishedUserNum = 0;
-	var users = {};
+	var finishedUserNum;
+	var users;
 	var lastInsertedHighId;
 	var lastInsertedLowId;
 	var startTimer;
+
+	var resetGame = function ()
+	{
+		finishedUserNum = 0;
+		users = {};
+		Max.remove({});
+		Min.remove({});
+		ScoreBoard.remove({});
+		answer = Math.floor((Math.random() * 9999) + 1);
+		GameStatus.remove({});
+		GameStatus.insert({ announcementText: 'GO! Guess a number' });
+	}
+
+	resetGame();
+
 	var isEveryoneFinished = function ()
 	{
 		var isDone = false;
@@ -178,17 +193,7 @@ if (Meteor.isServer)
 		}
 	}
 
-	var resetGame = function ()
-	{
-		finishedUserNum = 0;
-		users = {};
-		Max.remove({});
-		Min.remove({});
-		ScoreBoard.remove({});
-		answer = Math.floor((Math.random() * 100) + 1);
-		GameStatus.remove({});
-		GameStatus.insert({ announcementText: 'GO! Guess a number' });
-	}
+
 
 	Meteor.methods({
 		guessNumber: function (chat, username)
@@ -238,20 +243,20 @@ if (Meteor.isServer)
 					{
 						if (chatInt > currMax.max)
 						{
-							return 'Your guess is too high(' + chatInt + ')';
+							return '(' + chatInt + ')&darr;';
 						}
 					}
 
 					// guess was too high
 					Max.remove({});
-					lastInsertedHighId = Max.insert({ max: chatInt, high_num_bullet_visibility: 'visible' });
+					lastInsertedHighId = Max.insert({ max: chatInt, high_num_bullet_visibility: '900' });
 					if (lastInsertedLowId != null)
 					{
 						Min.update(lastInsertedLowId, {
-							$set: { low_num_bullet_visibility: 'hidden' }
+							$set: { low_num_bullet_visibility: 'normal' }
 						});
 					}
-					return 'Your guess is too high(' + chatInt + ')';
+					return '(' + chatInt + ')&darr;';
 				}
 				else
 				{
@@ -263,19 +268,19 @@ if (Meteor.isServer)
 					{
 						if (chatInt < currMin.min)
 						{
-							return 'Your guess is too low(' + chatInt + ')';
+							return '(' + chatInt + ')&uarr;';
 						}
 					}
 
 					Min.remove({});
-					lastInsertedLowId = Min.insert({ min: chatInt, low_num_bullet_visibility: 'visible' });
+					lastInsertedLowId = Min.insert({ min: chatInt, low_num_bullet_visibility: '900' });
 					if (lastInsertedHighId != null)
 					{
 						Max.update(lastInsertedHighId, {
-							$set: { high_num_bullet_visibility: 'hidden' }
+							$set: { high_num_bullet_visibility: 'normal' }
 						});
 					}
-					return 'Your guess is too low(' + chatInt + ')';
+					return '(' + chatInt + ')&uarr;';
 				}
 			}
 		}
