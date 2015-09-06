@@ -88,11 +88,12 @@ if (Meteor.isServer) {
 
     var gameOver = function()
     {
-    	Meteor.setTimeOut(resetGame, 10000);
+    	Meteor.setTimeout(resetGame, 10000);
     }
 
     var resetGame = function ()
     {
+    	answer = Math.floor((Math.random() * 100) + 1);
     	finishedUserNum = 0;
     	users = {};
     	Max.remove({});
