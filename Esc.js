@@ -1,4 +1,4 @@
-Chats = new Mongo.Collection("chats");
+//Chats = new Mongo.Collection("chats");
 Max = new Mongo.Collection('max');
 Min = new Mongo.Collection('min');
 
@@ -94,10 +94,10 @@ if (Meteor.isServer)
 		Max.remove({});
 		Min.remove({});
 		// code to run on server at startup
-		Chats.remove({});
-		Chats.insert({
-			guessed_number: "Guess a number between 1 and 100!"
-		})
+		//Chats.remove({});
+		//Chats.insert({
+		//	guessed_number: "Guess a number between 1 and 100!"
+		//})
 	});
 
 	Meteor.methods({
