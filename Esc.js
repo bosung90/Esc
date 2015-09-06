@@ -40,12 +40,14 @@ if (Meteor.isClient) {
 
     Template.body.events({
         "submit .new-chat": function (event) {
+            document.getElementById("prevName").style.visibility = "invisible";
             var createdAt = new Date().getTime();
             // Prevent default browser form submit
             event.preventDefault();
             // Get value from form element
             var text = event.target.text.value;
             var username = event.target.username.value;
+            document.getElementById("afterName").innerHTML = "New text!";
             // Insert a task into the collection
             //Chats.insert({
             //	guessed_number: text
