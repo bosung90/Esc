@@ -34,7 +34,7 @@ if (Meteor.isClient)
 			var firstMax = Max.findOne();
 			if (firstMax == null)
 			{
-				return 10000;
+				return 1000;
 			}
 			else
 			{
@@ -97,9 +97,19 @@ if (Meteor.isServer)
 	var finishedUserNum;
 	var users;
 	var lastInsertedNum;
-	var lastInsertedHighId;
-	var lastInsertedLowId;
 	var startTimer;
+	var isStartTimeTicking = false;
+	var isGameOver = false;
+
+	var answerTimerTicker = function ()
+	{
+		if (answer != null)
+		{
+			console.log(answer);
+			answer -= 1;
+			Meteor.setTimeout(answerTimerTicker, 1000);
+		}
+	}
 
 	var resetGame = function ()
 	{
@@ -108,12 +118,16 @@ if (Meteor.isServer)
 		Max.remove({});
 		Min.remove({});
 		ScoreBoard.remove({});
-		answer = Math.floor((Math.random() * 999) + 1);
+		answer = Math.floor((Math.random() * 999) + 31);
 		GameStatus.remove({});
 		GameStatus.insert({ announcementText: 'GO! Guess a number' });
+		isGameOver = false;
+		if (!isStartTimeTicking)
+		{
+			isStartTimeTicking = true;
+			answerTimerTicker();
+		}
 	}
-
-	resetGame();
 
 	var isEveryoneFinished = function ()
 	{
@@ -147,15 +161,12 @@ if (Meteor.isServer)
 	{
 		GameStatus.remove({});
 		GameStatus.insert({ announcementText: 'Everyone is Done!     Ranking is shown below' })
-		console.log('gameOver');
 		startTimer = 15000;
 		countStartTimer();
 	}
 
 	var countStartTimer = function ()
 	{
-		console.log('countDown: ' + startTimer);
-
 		if (startTimer <= 0)
 		{
 			console.log('resetting game');
@@ -179,6 +190,11 @@ if (Meteor.isServer)
 	Meteor.methods({
 		guessNumber: function (chat, username)
 		{
+			if (isGameOver)
+			{
+				return 'Game is over, please wait';
+			}
+
 			// Check if users has username
 			if (users[username] == null)
 			{
@@ -186,6 +202,10 @@ if (Meteor.isServer)
 				var newUserId = ScoreBoard.insert({ score: '', isRanked: false, name: username });
 				users[username] = {};
 				users[username].userId = newUserId;
+			}
+			else if (users[username].rank != null)
+			{
+				return 'You guessed correct already. Please wait';
 			}
 
 			// Check if chat is a number
@@ -210,6 +230,7 @@ if (Meteor.isServer)
 					if (isEveryoneFinished())
 					{
 						console.log('everyone is finished');
+						isGameOver = true;
 						gameOver();
 					}
 					return 'You got the correct answer!(' + chatInt + ')';
@@ -219,13 +240,7 @@ if (Meteor.isServer)
 					// guess was too high
 					lastInsertedNum = chatInt;
 					Max.remove({});
-					lastInsertedHighId = Max.insert({ max: chatInt, isDown: true });
-					if (lastInsertedLowId != null)
-					{
-						Min.update(lastInsertedLowId, {
-							$set: { low_num_bullet_visibility: 'normal' }
-						});
-					}
+					Max.insert({ max: chatInt, isDown: true });
 					return '(' + chatInt + ')&darr;';
 				}
 				else
@@ -233,13 +248,7 @@ if (Meteor.isServer)
 					// guess was too low
 					lastInsertedNum = chatInt;
 					Max.remove({});
-					lastInsertedLowId = Max.insert({ max: chatInt, isDown: false });
-					if (lastInsertedHighId != null)
-					{
-						Max.update(lastInsertedHighId, {
-							$set: { high_num_bullet_visibility: 'normal' }
-						});
-					}
+					Max.insert({ max: chatInt, isDown: false });
 					return '(' + chatInt + ')&uarr;';
 				}
 			}
