@@ -193,8 +193,6 @@ if (Meteor.isServer)
 		}
 	}
 
-
-
 	Meteor.methods({
 		guessNumber: function (chat, username)
 		{
