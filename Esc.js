@@ -121,11 +121,9 @@ if (Meteor.isServer) {
                     // user guessed the correct number
                     finishedUserNum++;
                     users[username] = finishedUserNum;
+                    ScoreBoard.insert({ score: finishedUserNum, name: username });
                     if (isEveryoneFinished()) {
-                        var sortedUser = sortUserByRank(users);
-                        for (i = 0; i < sortedUser.length; i++) {
-                            ScoreBoard.insert({ score: sortedUser[i][1], name: sortedUser[i][0] });
-                        }
+                        
                         gameOver();
                     }
                     return;
