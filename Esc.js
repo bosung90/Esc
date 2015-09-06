@@ -74,24 +74,31 @@ if (Meteor.isServer) {
 
         return isDone;
     }
+
     var sortUserByRank = function (map) {
         var tupleArray = [];
         for (var key in map) tupleArray.push([key, map[key]]);
         tupleArray.sort(function (a, b) { return a[1] - b[1] });
         return tupleArray;
     }
+
     Meteor.startup(function () {
-        finishedUserNum = 0;
-        users = {};
-        Max.remove({});
-        Min.remove({});
-        ScoreBoard.remove({});
-        // code to run on server at startup
-        //Chats.remove({});
-        //Chats.insert({
-        //	guessed_number: "Guess a number between 1 and 100!"
-        //})
+    	resetGame();
     });
+
+    var gameOver = function()
+    {
+    	Meteor.setTimeOut(resetGame, 10000);
+    }
+
+    var resetGame = function ()
+    {
+    	finishedUserNum = 0;
+    	users = {};
+    	Max.remove({});
+    	Min.remove({});
+    	ScoreBoard.remove({});
+    }
 
     Meteor.methods({
         addChat: function (chat, username) {
@@ -111,7 +118,6 @@ if (Meteor.isServer) {
                 var chatInt = parseInt(chat);
                 if (chatInt == answer) {
                     // user guessed the correct number
-                    //feedback = Chats.insert({ guessed_number: username + ' got the correct answer!' });
                     finishedUserNum++;
                     users[username] = finishedUserNum;
                     if (isEveryoneFinished()) {
@@ -119,10 +125,7 @@ if (Meteor.isServer) {
                         for (i = 0; i < sortedUser.length; i++) {
                             ScoreBoard.insert({ score: sortedUser[i][1], name: sortedUser[i][0] });
                         }
-                        users = {};
-                        finishedUserNum = 0;
-                        Max.remove({});
-                        Min.remove({});
+                        gameOver();
                     }
                     return;
                 }
