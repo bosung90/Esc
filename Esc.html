@@ -14,7 +14,7 @@
 		<div class="row">
 			<div class="col s12 m10 l8 center">
 				<form class="new-chat">
-					<input type="number" required name="text" autofocus="autofocus" min="1" max="10000" placeholder="Guess a number" />
+					<input type="number" required name="text" autofocus="autofocus" min="1" max="999" placeholder="Guess a number" />
 					<input type="text" id="nameID" required name="username" placeholder="Enter your name" />
 					<input type="submit" style="visibility: hidden;" />
 				</form>
@@ -48,12 +48,12 @@
 		<div class="col s12 m10 l8 center">
 			<div class="card-panel pink" style="text-align: center; font-size: larger">
 				<span class="white-text">
-					<div style="font-weight: {{high_num_bullet_visibility}}">{{high_num}}&darr;</div>
+					{{high_num}}{{#if is_down_arrow}}&darr;{{else}}&uarr;{{/if}}
 				</span>
 			</div>
 		</div>
 	</div>
-	<br />
+	<!--<br />
 	<div class="row">
 		<div class="col s12 m10 l8 center">
 			<div class="card-panel pink" style="text-align: center; font-size: larger">
@@ -62,5 +62,5 @@
 				</span>
 			</div>
 		</div>
-	</div>
+	</div>-->
 </template>

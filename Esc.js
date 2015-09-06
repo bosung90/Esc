@@ -41,35 +41,17 @@ if (Meteor.isClient)
 				return Max.findOne().max;
 			}
 		},
-		low_num: function ()
+		is_down_arrow: function ()
 		{
-			var firstMin = Min.findOne();
-			if (firstMin == null)
+			var lastInputNum = Max.findOne();
+			if (lastInputNum == null)
 			{
-				return 0;
+				return true;
 			}
 			else
 			{
-				return Min.findOne().min;
+				return Max.findOne().isDown;
 			}
-		},
-		high_num_bullet_visibility: function ()
-		{
-			var firstMax = Max.findOne();
-			if (firstMax == null)
-			{
-				return 'normal';
-			}
-			return Max.findOne().high_num_bullet_visibility;
-		},
-		low_num_bullet_visibility: function ()
-		{
-			var firstMin = Min.findOne();
-			if (firstMin == null)
-			{
-				return 'normal';
-			}
-			return Min.findOne().low_num_bullet_visibility;
 		}
 	});
 
@@ -114,6 +96,7 @@ if (Meteor.isServer)
 	// Keep track of number of players who got the right answer
 	var finishedUserNum;
 	var users;
+	var lastInsertedNum;
 	var lastInsertedHighId;
 	var lastInsertedLowId;
 	var startTimer;
@@ -125,7 +108,7 @@ if (Meteor.isServer)
 		Max.remove({});
 		Min.remove({});
 		ScoreBoard.remove({});
-		answer = Math.floor((Math.random() * 9999) + 1);
+		answer = Math.floor((Math.random() * 999) + 1);
 		GameStatus.remove({});
 		GameStatus.insert({ announcementText: 'GO! Guess a number' });
 	}
@@ -193,8 +176,6 @@ if (Meteor.isServer)
 		}
 	}
 
-
-
 	Meteor.methods({
 		guessNumber: function (chat, username)
 		{
@@ -217,10 +198,9 @@ if (Meteor.isServer)
 			{
 				// It is a number
 				var chatInt = parseInt(chat);
+
 				if (chatInt == answer)
 				{
-					isLastNumHigh = true;
-					isLastNumLow = true;
 					// user guessed the correct number
 					finishedUserNum++;
 					users[username].rank = finishedUserNum;
@@ -236,20 +216,10 @@ if (Meteor.isServer)
 				}
 				else if (chatInt > answer)
 				{
-					isLastNumHigh = true;
-					isLastNumLow = false;
-					var currMax = Max.findOne();
-					if (currMax != null)
-					{
-						if (chatInt > currMax.max)
-						{
-							return '(' + chatInt + ')&darr;';
-						}
-					}
-
 					// guess was too high
+					lastInsertedNum = chatInt;
 					Max.remove({});
-					lastInsertedHighId = Max.insert({ max: chatInt, high_num_bullet_visibility: '900' });
+					lastInsertedHighId = Max.insert({ max: chatInt, isDown: true });
 					if (lastInsertedLowId != null)
 					{
 						Min.update(lastInsertedLowId, {
@@ -260,20 +230,10 @@ if (Meteor.isServer)
 				}
 				else
 				{
-					isLastNumHigh = false;
-					isLastNumLow = true;
 					// guess was too low
-					var currMin = Min.findOne();
-					if (currMin != null)
-					{
-						if (chatInt < currMin.min)
-						{
-							return '(' + chatInt + ')&uarr;';
-						}
-					}
-
-					Min.remove({});
-					lastInsertedLowId = Min.insert({ min: chatInt, low_num_bullet_visibility: '900' });
+					lastInsertedNum = chatInt;
+					Max.remove({});
+					lastInsertedLowId = Max.insert({ max: chatInt, isDown: false });
 					if (lastInsertedHighId != null)
 					{
 						Max.update(lastInsertedHighId, {
@@ -283,6 +243,19 @@ if (Meteor.isServer)
 					return '(' + chatInt + ')&uarr;';
 				}
 			}
+		},
+
+		isLastNumHigh: function ()
+		{
+			// check to see if last entered number is higher than the answer
+			if (lastInsertedNum != null)
+			{
+				if (lastInsertedNum > answer)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 	});
 }
