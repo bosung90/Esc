@@ -25,9 +25,6 @@
 				</tr>
 			</thead>
 			<tbody>
-                {{#each userlist}}
-					{{> users}}
-                {{/each}}
 				{{#each ranks}}
 					{{> rank}}
 				{{/each}}
@@ -40,13 +37,6 @@
     <tr>
         <td>{{score}}</td>
         <td>{{name}}</td>
-    </tr>
-</template>
-
-<template name ="users">
-    <tr>
-        <td></td>
-        <td>{{userID}}</td>
     </tr>
 </template>
 
@@ -73,5 +63,3 @@
         </div>
     </div>
 </template>
-
-
