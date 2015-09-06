@@ -3,7 +3,12 @@ Max = new Mongo.Collection('max');
 Min = new Mongo.Collection('min');
 
 if (Meteor.isClient) {
-    Meteor.subscribe("scores");
+    Template.body.helpers({
+        ranks: function () {
+            return ScoreBoard.find({});
+        }
+    });
+
     Template.number_range.helpers({
         high_num: function () {
             var firstMax = Max.findOne();
@@ -80,6 +85,7 @@ if (Meteor.isServer) {
         users = {};
         Max.remove({});
         Min.remove({});
+        ScoreBoard.remove({});
         // code to run on server at startup
         //Chats.remove({});
         //Chats.insert({
@@ -98,13 +104,11 @@ if (Meteor.isServer) {
             // Check if chat is a number
             if (isNaN(chat)) {
                 // It is not a number
-                var new_chat = Chats.insert({ guessed_number: chat + ' is not a number' });
-                return new_chat;
+                return;
             }
             else {
                 // It is a number
                 var chatInt = parseInt(chat);
-                var feedback;
                 if (chatInt == answer) {
                     // user guessed the correct number
                     //feedback = Chats.insert({ guessed_number: username + ' got the correct answer!' });
@@ -113,45 +117,40 @@ if (Meteor.isServer) {
                     if (isEveryoneFinished()) {
                         var sortedUser = sortUserByRank(users);
                         for (i = 0; i < sortedUser.length; i++) {
-                            ScoreBoard.insert({ guessed_number: sortedUser[i][1] + ". " + sortedUser[i][0] });
+                            ScoreBoard.insert({ score: sortedUser[i][1], name: sortedUser[i][0] });
                         }
-                        Meteor.publish("scores", function () {
-                            return ScoreBoard.find();
-                        });
                         users = {};
                         finishedUserNum = 0;
                         Max.remove({});
                         Min.remove({});
-                        $("#modal1").modal('show');
                     }
-                    return feedback;
+                    return;
                 }
                 else if (chatInt > answer) {
                     var currMax = Max.findOne();
                     if (currMax != null) {
                         if (chatInt > currMax.max) {
-                            return null;
+                            return;
                         }
                     }
 
                     // guess was too high
                     Max.remove({});
                     Max.insert({ max: chatInt });
-                    return feedback;
+                    return;
                 }
                 else {
                     // guess was too low
                     var currMin = Min.findOne();
-                    if (currMin != null)
-                    {
+                    if (currMin != null) {
                         if (chatInt < currMin.min) {
-                            return null;
+                            return;
                         }
                     }
 
                     Min.remove({});
                     Min.insert({ min: chatInt });
-                    return feedback;
+                    return;
                 }
             }
         }

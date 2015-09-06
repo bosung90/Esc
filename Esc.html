@@ -1,58 +1,68 @@
 <head>
-	<title>Esc</title>
+    <title>Esc</title>
 </head>
 
 <body>
-	<div class="guess_number_wrapper">
-		<h2>NumberEsc</h2>
-		<div class="center">
-			{{> number_range}}
-		</div>
-		<div class="row">
-			<div class="col s12 m10 l8 center">
-				<form class="new-chat">
-					<input type="number" required name="text" autofocus="autofocus" min="1" max="100" placeholder="Type to add new chats" />
-					<input type="text" required name="username" placeholder="Enter your name" />
-					<input type="submit" style="visibility: hidden;" />
-				</form>
-			</div>
-		</div>
-	</div>
-
-    <!-- Modal Structure -->
-    <div id="modal1" class="modal">
-        <div class="modal-content">
-            <h4>Modal Header</h4>
-            <p>A bunch of text</p>
+    <div class="guess_number_wrapper">
+        <h2>NumberEsc</h2>
+        <div class="center">
+            {{> number_range}}
         </div>
-        <div class="modal-footer">
-            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+        <div class="row">
+            <div class="col s12 m10 l8 center">
+                <form class="new-chat">
+                    <input type="number" required name="text" autofocus="autofocus" min="1" max="100" placeholder="Type to add new chats" />
+                    <input type="text" required name="username" placeholder="Enter your name" />
+                    <input type="submit" style="visibility: hidden;" />
+                </form>
+            </div>
         </div>
     </div>
+
+    <table class="striped">
+        <thead>
+            <tr>
+                <th data-field="id">Rank</th>
+                <th data-field="name">Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each ranks}}
+                {{> rank}}
+            {{/each}}
+        </tbody>
+    </table>
 </body>
 
+<template name="rank">
+    <tr>
+        <td>{{score}}</td>
+        <td>{{name}}</td>
+    </tr>
+</template>
+
 <template name="number_range">
-	<div class="row">
-		<div class="col s12 m10 l8 center">
-			<div class="card-panel pink" style="text-align: center; font-size: larger">
-				<span class="white-text">
-					{{high_num}}
-					&darr;
-				</span>
-			</div>
-		</div>
-	</div>
-	<br />
-	<div class="row center">
-		<div class="col s12 m10 l8 center">
-			<div class="card-panel pink" style="text-align: center; font-size: larger">
-				<span class="white-text">
-					{{lower_num}}
-					&uarr;
-				</span>
-			</div>
-		</div>
-	</div>
+    <div class="row">
+        <div class="col s12 m10 l8 center">
+            <div class="card-panel pink" style="text-align: center; font-size: larger">
+                <span class="white-text">
+                    {{high_num}}
+                    &darr;
+                </span>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row center">
+        <div class="col s12 m10 l8 center">
+            <div class="card-panel pink" style="text-align: center; font-size: larger">
+                <span class="white-text">
+                    {{lower_num}}
+                    &uarr;
+                </span>
+            </div>
+        </div>
+    </div>
 </template>
 
 
