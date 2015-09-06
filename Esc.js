@@ -2,6 +2,17 @@ Chats = new Mongo.Collection("chats");
 
 if (Meteor.isClient)
 {
+	Template.number_range.helpers({
+		high_num: function ()
+		{
+			return 100;
+		},
+		lower_num: function ()
+		{
+			return 1;
+		}
+	});
+
 	var previous;
 	Template.body.helpers({
 		chats: function ()
