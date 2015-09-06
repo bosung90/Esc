@@ -94,7 +94,7 @@ if (Meteor.isServer) {
 
     var gameOver = function()
     {
-    	Meteor.setTimeOut(resetGame, 10000);
+    	Meteor.setTimeout(resetGame, 10000);
     }
 
     var resetGame = function ()
