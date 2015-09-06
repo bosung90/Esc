@@ -2,11 +2,12 @@ ScoreBoard = new Mongo.Collection("scores");
 Max = new Mongo.Collection('max');
 Min = new Mongo.Collection('min');
 GameStatus = new Mongo.Collection('gameStatus');
+GameCountDown = new Mongo.Collection('gameCountDown');
 
 if (Meteor.isClient)
 {
-	var previous;
-
+    var previous;
+    
 	Template.body.helpers({
 		ranks: function ()
 		{
@@ -25,6 +26,19 @@ if (Meteor.isClient)
 			{
 				document.getElementById('announcement').innerHTML = GameStatus.findOne().announcementText;
 			}
+		},
+		countdown: function ()
+		{
+		    if (GameCountDown.findOne() != null)
+		    {
+		        var timeRemaining = GameCountDown.findOne().countDown;
+		        console.log(timeRemaining);
+		        return timeRemaining;
+		    }
+		    else
+		    {
+		        return 30;
+		    }
 		}
 	});
 
