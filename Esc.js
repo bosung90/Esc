@@ -1,8 +1,9 @@
-//Chats = new Mongo.Collection("chats");
+ScoreBoard = new Mongo.Collection("scores");
 Max = new Mongo.Collection('max');
 Min = new Mongo.Collection('min');
 
 if (Meteor.isClient) {
+    Meteor.subscribe("scores");
     Template.number_range.helpers({
         high_num: function () {
             var firstMax = Max.findOne();
@@ -106,18 +107,22 @@ if (Meteor.isServer) {
                 var feedback;
                 if (chatInt == answer) {
                     // user guessed the correct number
-                    feedback = Chats.insert({ guessed_number: username + ' got the correct answer!' });
+                    //feedback = Chats.insert({ guessed_number: username + ' got the correct answer!' });
                     finishedUserNum++;
                     users[username] = finishedUserNum;
                     if (isEveryoneFinished()) {
                         var sortedUser = sortUserByRank(users);
                         for (i = 0; i < sortedUser.length; i++) {
-                            Chats.insert({ guessed_number: sortedUser[i][1] + ". " + sortedUser[i][0] });
+                            ScoreBoard.insert({ guessed_number: sortedUser[i][1] + ". " + sortedUser[i][0] });
                         }
+                        Meteor.publish("scores", function () {
+                            return ScoreBoard.find();
+                        });
                         users = {};
                         finishedUserNum = 0;
                         Max.remove({});
                         Min.remove({});
+                        $("#modal1").modal('show');
                     }
                     return feedback;
                 }
