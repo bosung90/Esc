@@ -1,1 +1,70 @@
 /* CSS declarations go here */
+
+body{
+    overflow: hidden;
+    background-image : url('space.jpg');
+    width: 100%;
+    height: 100%;
+}
+
+.container{
+    position : fixed;
+    width: 100%;
+    height: 100%;
+
+}
+
+.shuttle {
+    background-image : url('ss.png');
+    background-size : 600px 600px;
+    position: absolute;
+    right: -30%;
+    top: 0%;
+    width : 600px;
+    height: 600px;
+}
+
+.earth {
+    background-image : url('earth.png');
+    background-size : 600px 600px;
+    position: absolute;
+    margin-left: -20%;
+    width: 600px;
+    height: 600px;
+}
+
+.text-winner{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 300px;
+    
+}
+
+.text-loser{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 300px;
+    
+}
+
+.meteor{
+    position: absolute;
+    height: 50px;
+    width: 50px;
+    right: -10%;
+    top: -100%;
+}
+
+.exp{
+    position: absolute;
+    height: 420px;
+    width: 340px;
+    right: 76%;
+    top: -20%;
+}

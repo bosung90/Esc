@@ -2,6 +2,7 @@ ScoreBoard = new Mongo.Collection("scores");
 Max = new Mongo.Collection('max');
 Min = new Mongo.Collection('min');
 GameStatus = new Mongo.Collection('gameStatus');
+Status = new Mongo.Collection('statuss');
 
 if (Meteor.isClient)
 {
@@ -23,7 +24,52 @@ if (Meteor.isClient)
 			{
 				document.getElementById('announcement').innerHTML = GameStatus.findOne().announcementText;
 			}
-		}
+		},
+		winners: function()
+		{
+
+		    if (null != Status.findOne({ status: 'done' })) {
+		        console.log("done!");
+		        $('div.shuttle').show().animate({
+		            bottom: '100%',
+		            right: '120%'
+		        }, 5000);
+		        $('div.container-earth').animate({
+		            //...
+		        });
+		        $('img.meteor').show().delay(2000).animate({
+		            height: '500px',
+		            width: '500px',
+                    right: "54%",
+                    top: "-28%"
+		        }, 5000);
+		        $('img.exp').delay(5000).show().css({ 'opacity': 0 }).animate({
+		            opacity : '1'
+		        },1000);
+		    } else {
+		        console.log("restarted jquery");
+		        console.log($('.exp'));
+		        setTimeout(function () {
+		            console.log($('.exp'));
+		            $('.exp').hide();
+		            $('.meteor').css({
+		                right: "-10%",
+		                top: "-100%"
+		            }).hide();
+		            $('div.shuttle').css({
+		                right: "-30%",
+		                top: "0%"
+		            }).hide();
+		        },100)
+		        
+		                        
+		    }
+		        return ScoreBoard.find({ isRanked: true });
+		},
+	    losers: function()
+	    {
+	    return ScoreBoard.find({ isRanked: false });
+	}
 	});
 
 	Template.number_range.helpers({
@@ -111,7 +157,7 @@ if (Meteor.isClient)
 if (Meteor.isServer)
 {
 	var answer = Math.floor((Math.random() * 9999) + 1);
-	// Keep track of number of players who got the right answer
+    // Keep track of number of players who got the right answer
 	var finishedUserNum = 0;
 	var users = {};
 	var lastInsertedHighId;
@@ -147,11 +193,13 @@ if (Meteor.isServer)
 
 	var gameOver = function ()
 	{
-		GameStatus.remove({});
-		GameStatus.insert({ announcementText: 'Everyone is Done!     Ranking is shown below' })
+	    GameStatus.remove({});
+	    GameStatus.insert({ announcementText: 'Everyone is Done!     Ranking is shown below' });
+	    Status.insert({ status: 'done' });
 		console.log('gameOver');
 		startTimer = 15000;
 		countStartTimer();
+		
 	}
 
 	var countStartTimer = function ()
@@ -186,8 +234,10 @@ if (Meteor.isServer)
 		Min.remove({});
 		ScoreBoard.remove({});
 		answer = Math.floor((Math.random() * 100) + 1);
+		console.log(answer);
 		GameStatus.remove({});
 		GameStatus.insert({ announcementText: 'GO! Guess a number' });
+		Status.remove({});
 	}
 
 	Meteor.methods({
@@ -224,7 +274,8 @@ if (Meteor.isServer)
 					});
 					if (isEveryoneFinished())
 					{
-						console.log('everyone is finished');
+					    console.log('everyone is finished');
+
 						gameOver();
 					}
 					return 'You got the correct answer!(' + chatInt + ')';
