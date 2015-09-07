@@ -6,14 +6,16 @@
     <div class="guess_number_wrapper position_relative">
         <h2>NumberEsc</h2>
         <div id="clock">
-            {{countdown}}
-        </div>
-        <img src="alarm_clock.png" />
-        <div id="announcement" class="float_center_announce">
-            {{announcementText}}
+            <img src="alarm_clock.png" />
+            <div class="float_center">
+                {{countdown}}
+            </div>
         </div>
         <div class="center">
             {{> number_range}}
+        </div>
+        <div id="announcement" class="float_center_announce">
+            {{announcementText}}
         </div>
         <div class="row">
             <div class="col s12 m10 l8 center">
@@ -50,21 +52,11 @@
 <template name="number_range">
     <div class="row">
         <div class="col s12 m10 l8 center">
-            <div class="card-panel pink" style="text-align: center; font-size: larger">
-                <span class="white-text">
+            <div class="card-panel pink">
+                <span class="white-text float_center">
                     {{high_num}}{{#if is_down_arrow}}&darr;{{else}}&uarr;{{/if}}
                 </span>
             </div>
         </div>
     </div>
-    <!--<br />
-    <div class="row">
-        <div class="col s12 m10 l8 center">
-            <div class="card-panel pink" style="text-align: center; font-size: larger">
-                <span class="white-text">
-                    <div style="font-weight: {{low_num_bullet_visibility}}">{{low_num}}&uarr;</div>
-                </span>
-            </div>
-        </div>
-    </div>-->
 </template>

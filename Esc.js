@@ -31,7 +31,7 @@ if (Meteor.isClient)
 		{
 		    if (GameCountDown.findOne() != null)
 		    {
-		        var timeRemaining = GameCountDown.findOne().countDown;
+		        var timeRemaining = GameCountDown.findOne().time;
 		        console.log(timeRemaining);
 		        return timeRemaining;
 		    }
@@ -106,7 +106,8 @@ if (Meteor.isClient)
 
 if (Meteor.isServer)
 {
-	var answer;
+    var answer;
+    var timeRemaining;
 	// Keep track of number of players who got the right answer
 	var finishedUserNum;
 	var users;
@@ -119,10 +120,15 @@ if (Meteor.isServer)
 	{
 		if (answer != null)
 		{
-			console.log(answer);
-			answer -= 1;
-			Meteor.setTimeout(answerTimerTicker, 1000);
+			answer--;
+		} 
+		if (timeRemaining != null && timeRemaining > 0)
+		{
+		    timeRemaining--;
+		    GameCountDown.remove({});
+		    GameCountDown.insert({ time: timeRemaining });
 		}
+		Meteor.setTimeout(answerTimerTicker, 1000);
 	}
 
 	var resetGame = function ()
@@ -136,6 +142,7 @@ if (Meteor.isServer)
 		GameStatus.remove({});
 		GameStatus.insert({ announcementText: 'GO! Guess a number' });
 		isGameOver = false;
+		timeRemaining = 31;
 		if (!isStartTimeTicking)
 		{
 			isStartTimeTicking = true;
