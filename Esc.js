@@ -47,7 +47,7 @@ if (Meteor.isClient)
 		    if (null != Status.findOne({ status: 'done' })) {
 		        console.log("done!");
 		        $('div.shuttle').show().animate({
-		            bottom: '100%',
+		            top: '-120%',
 		            right: '120%'
 		        }, 5000);
 		        $('div.container-earth').animate({
@@ -59,7 +59,7 @@ if (Meteor.isClient)
                     right: "54%",
                     top: "-28%"
 		        }, 5000);
-		        $('img.exp').delay(5000).show().css({ 'opacity': 0 }).animate({
+		        $('img.exp').delay(6000).show().css({ 'opacity': 0 }).animate({
 		            opacity : '1'
 		        },1000);
 		    } else {
@@ -166,7 +166,9 @@ if (Meteor.isServer)
 	{
 		if (answer != null)
 		{
-			answer--;
+		    //answer--;
+
+		    
 		} 
 		if (timeRemaining != null && timeRemaining > 0)
 		{
@@ -185,6 +187,7 @@ if (Meteor.isServer)
 		Min.remove({});
 		ScoreBoard.remove({});
 		answer = Math.floor((Math.random() * 999) + 31);
+		console.log(answer);
 		GameStatus.remove({});
 		GameStatus.insert({ announcementText: 'GO! Guess a number' });
 		isGameOver = false;
