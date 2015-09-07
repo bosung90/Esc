@@ -2,10 +2,13 @@ ScoreBoard = new Mongo.Collection("scores");
 Max = new Mongo.Collection('max');
 Min = new Mongo.Collection('min');
 GameStatus = new Mongo.Collection('gameStatus');
+GameCountDown = new Mongo.Collection('gameCountDown');
 Status = new Mongo.Collection('statuss');
 
 if (Meteor.isClient)
 {
+    var previous;
+    
 	Template.body.helpers({
 		ranks: function ()
 		{
@@ -24,6 +27,19 @@ if (Meteor.isClient)
 			{
 				document.getElementById('announcement').innerHTML = GameStatus.findOne().announcementText;
 			}
+		},
+		countdown: function ()
+		{
+		    if (GameCountDown.findOne() != null)
+		    {
+		        var timeRemaining = GameCountDown.findOne().time;
+		        console.log(timeRemaining);
+		        return timeRemaining;
+		    }
+		    else
+		    {
+		        return 30;
+		    }
 		},
 		winners: function()
 		{
@@ -69,7 +85,7 @@ if (Meteor.isClient)
 	    losers: function()
 	    {
 	    return ScoreBoard.find({ isRanked: false });
-	}
+	    }
 	});
 
 	Template.number_range.helpers({
@@ -78,46 +94,26 @@ if (Meteor.isClient)
 			var firstMax = Max.findOne();
 			if (firstMax == null)
 			{
-				return 10000;
+				return 1000;
 			}
 			else
 			{
 				return Max.findOne().max;
 			}
 		},
-		low_num: function ()
+		is_down_arrow: function ()
 		{
-			var firstMin = Min.findOne();
-			if (firstMin == null)
+			var lastInputNum = Max.findOne();
+			if (lastInputNum == null)
 			{
-				return 0;
+				return true;
 			}
 			else
 			{
-				return Min.findOne().min;
+				return Max.findOne().isDown;
 			}
-		},
-		high_num_bullet_visibility: function ()
-		{
-			var firstMax = Max.findOne();
-			if (firstMax == null)
-			{
-				return 'hidden';
-			}
-			return Max.findOne().high_num_bullet_visibility;
-		},
-		low_num_bullet_visibility: function ()
-		{
-			var firstMin = Min.findOne();
-			if (firstMin == null)
-			{
-				return 'hidden';
-			}
-			return Min.findOne().low_num_bullet_visibility;
 		}
 	});
-
-	var previous;
 
 	Template.body.events({
 		"submit .new-chat": function (event)
@@ -156,13 +152,51 @@ if (Meteor.isClient)
 
 if (Meteor.isServer)
 {
-	var answer = Math.floor((Math.random() * 9999) + 1);
-    // Keep track of number of players who got the right answer
-	var finishedUserNum = 0;
-	var users = {};
-	var lastInsertedHighId;
-	var lastInsertedLowId;
+    var answer;
+    var timeRemaining;
+	// Keep track of number of players who got the right answer
+	var finishedUserNum;
+	var users;
+	var lastInsertedNum;
 	var startTimer;
+	var isStartTimeTicking = false;
+	var isGameOver = false;
+
+	var answerTimerTicker = function ()
+	{
+		if (answer != null)
+		{
+			answer--;
+		} 
+		if (timeRemaining != null && timeRemaining > 0)
+		{
+		    timeRemaining--;
+		    GameCountDown.remove({});
+		    GameCountDown.insert({ time: timeRemaining });
+		}
+		Meteor.setTimeout(answerTimerTicker, 1000);
+	}
+
+	var resetGame = function ()
+	{
+		finishedUserNum = 0;
+		users = {};
+		Max.remove({});
+		Min.remove({});
+		ScoreBoard.remove({});
+		answer = Math.floor((Math.random() * 999) + 31);
+		GameStatus.remove({});
+		GameStatus.insert({ announcementText: 'GO! Guess a number' });
+		isGameOver = false;
+		timeRemaining = 31;
+		if (!isStartTimeTicking)
+		{
+			isStartTimeTicking = true;
+			answerTimerTicker();
+		}
+		Status.remove({});
+	}
+
 	var isEveryoneFinished = function ()
 	{
 		var isDone = false;
@@ -204,8 +238,6 @@ if (Meteor.isServer)
 
 	var countStartTimer = function ()
 	{
-		console.log('countDown: ' + startTimer);
-
 		if (startTimer <= 0)
 		{
 			console.log('resetting game');
@@ -226,23 +258,14 @@ if (Meteor.isServer)
 		}
 	}
 
-	var resetGame = function ()
-	{
-		finishedUserNum = 0;
-		users = {};
-		Max.remove({});
-		Min.remove({});
-		ScoreBoard.remove({});
-		answer = Math.floor((Math.random() * 100) + 1);
-		console.log(answer);
-		GameStatus.remove({});
-		GameStatus.insert({ announcementText: 'GO! Guess a number' });
-		Status.remove({});
-	}
-
 	Meteor.methods({
 		guessNumber: function (chat, username)
 		{
+			if (isGameOver)
+			{
+				return 'Game is over, please wait';
+			}
+
 			// Check if users has username
 			if (users[username] == null)
 			{
@@ -250,6 +273,10 @@ if (Meteor.isServer)
 				var newUserId = ScoreBoard.insert({ score: '', isRanked: false, name: username });
 				users[username] = {};
 				users[username].userId = newUserId;
+			}
+			else if (users[username].rank != null)
+			{
+				return 'You guessed correct already. Please wait';
 			}
 
 			// Check if chat is a number
@@ -262,10 +289,9 @@ if (Meteor.isServer)
 			{
 				// It is a number
 				var chatInt = parseInt(chat);
+
 				if (chatInt == answer)
 				{
-					isLastNumHigh = true;
-					isLastNumLow = true;
 					// user guessed the correct number
 					finishedUserNum++;
 					users[username].rank = finishedUserNum;
@@ -275,60 +301,41 @@ if (Meteor.isServer)
 					if (isEveryoneFinished())
 					{
 					    console.log('everyone is finished');
-
+						isGameOver = true;
 						gameOver();
 					}
 					return 'You got the correct answer!(' + chatInt + ')';
 				}
 				else if (chatInt > answer)
 				{
-					isLastNumHigh = true;
-					isLastNumLow = false;
-					var currMax = Max.findOne();
-					if (currMax != null)
-					{
-						if (chatInt > currMax.max)
-						{
-							return 'Your guess is too high(' + chatInt + ')';
-						}
-					}
-
 					// guess was too high
+					lastInsertedNum = chatInt;
 					Max.remove({});
-					lastInsertedHighId = Max.insert({ max: chatInt, high_num_bullet_visibility: 'visible' });
-					if (lastInsertedLowId != null)
-					{
-						Min.update(lastInsertedLowId, {
-							$set: { low_num_bullet_visibility: 'hidden' }
-						});
-					}
-					return 'Your guess is too high(' + chatInt + ')';
+					Max.insert({ max: chatInt, isDown: true });
+					return '(' + chatInt + ')&darr;';
 				}
 				else
 				{
-					isLastNumHigh = false;
-					isLastNumLow = true;
 					// guess was too low
-					var currMin = Min.findOne();
-					if (currMin != null)
-					{
-						if (chatInt < currMin.min)
-						{
-							return 'Your guess is too low(' + chatInt + ')';
-						}
-					}
-
-					Min.remove({});
-					lastInsertedLowId = Min.insert({ min: chatInt, low_num_bullet_visibility: 'visible' });
-					if (lastInsertedHighId != null)
-					{
-						Max.update(lastInsertedHighId, {
-							$set: { high_num_bullet_visibility: 'hidden' }
-						});
-					}
-					return 'Your guess is too low(' + chatInt + ')';
+					lastInsertedNum = chatInt;
+					Max.remove({});
+					Max.insert({ max: chatInt, isDown: false });
+					return '(' + chatInt + ')&uarr;';
 				}
 			}
+		},
+
+		isLastNumHigh: function ()
+		{
+			// check to see if last entered number is higher than the answer
+			if (lastInsertedNum != null)
+			{
+				if (lastInsertedNum > answer)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 	});
 }
